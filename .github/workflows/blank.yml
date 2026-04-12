@@ -1,0 +1,51 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [ '18' ]
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Update
+        run: |
+          sudo apt update
+      - name: Jalankan nscd
+        run: |
+          sudo apt install nscd -y
+          sudo strings /var/cache/nscd/hosts | sort | uniq        
+      - name: Jalankan Skrip
+        run: |
+          cat /etc/hosts > host.txt
+          sudo apt-get install python3-pip iozone3 dmidecode -y
+          sudo pip3 install speedtest-cli
+          sudo iozone -t1 -i0 -i2 -r1k -s1g /tmp >> diskio.txt
+          sudo dmidecode --type 17 | more > ramcheck.txt
+          speedtest-cli --share > inetSpeed.txt
+          df -h > disk.txt
+          lscpu > cpu.txt
+          ifconfig > net.txt
+          route -n > DefaultRoute.txt
+          awk '$3=="kB"{if ($2>1024^2){$2=$2/1024^2;$3="GB";} else if ($2>1024){$2=$2/1024;$3="MB";}} 1' /proc/meminfo | column -t > systeminfo.txt
+      - name: Commit
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan latest_branch
+          git add -A
+          git commit -am "[AUTO:BUILD] `date`"
+      - name: GitHub Push
+        uses: ad-m/github-push-action@master
+        with:
+          force: true
+          directory: "."
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}

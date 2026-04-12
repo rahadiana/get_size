@@ -1,0 +1,10 @@
+127.0.0.1 localhost
+
+# The following lines are desirable for IPv6 capable hosts
+::1     localhost ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+ff02::3 ip6-allhosts
+10.1.0.189 runnervm35a4x.eb4wsyhxqy4u5dpcvlyltl2uzf.dx.internal.cloudapp.net runnervm35a4x
